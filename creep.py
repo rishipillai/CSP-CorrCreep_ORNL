@@ -38,6 +38,16 @@ def dY_dt(t, Y):
                         (Kp/3)*(1-Y[4])**4, #dY[4]/dt
                         stress*(C3_e*eps0*exp(-C3_Q/(R*T))/(1-Y[2]))*sinh(Y[5]*(1-Y[1])/(sig0*(1-Y[3])*(1-Y[4])))]) #dY[5]/dt
 
+def lmpstress(stress,temp):
+    LMP=LMP_1+LMP_2*log10(stress)+LMP_3*(log10(stress))**2+LMP_4*(log10(stress))**3
+    rupturetime=10**((LMP/(temp+273.15))-20)
+    return rupturetime
+
+def lmpgp(vol_gp,temp):
+    LMP_GP=LMP_GP1+LMP_GP2*log10(vol_gp)+LMP_GP3*log10(vol_gp)**2+LMP_GP4*log10(vol_gp)**3+LMP_GP5*log10(vol_gp)**4
+    rupturetime_GP=10**((LMP_GP/(temp+273.15))-20)
+    return rupturetime_GP
+
 def timetocreep1(time,creepstrain):
 
     """ Computes surface concentration in wt.% """
@@ -129,6 +139,16 @@ if __name__=='__main__':
     C3_Q                    = float(simu_values[33]) # Activation energy for intrinsic strain rate kJ/mol
     C4                      = float(simu_values[34]) # Dislocation damage constant
 
+    LMP_1                   = float(simu_values[35]) # Stress dependence of LMP - parameter 1
+    LMP_2                   = float(simu_values[36]) # Stress dependence of LMP - parameter 2
+    LMP_3                   = float(simu_values[37])  # Stress dependence of LMP - parameter 3
+    LMP_4                   = float(simu_values[38])  # Stress dependence of LMP - parameter 4
+
+    LMP_GP1                   = float(simu_values[39]) # GP dependence of LMP - parameter 1
+    LMP_GP2                   = float(simu_values[40]) # GP dependence of LMP - parameter 2
+    LMP_GP3                   = float(simu_values[41]) # GP dependence of LMP - parameter 3
+    LMP_GP4                   = float(simu_values[42]) # GP dependence of LMP - parameter 4
+    LMP_GP5                   = float(simu_values[43])  # GP dependence of LMP - pa
         
     """calculates values from input file"""
 
