@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Corrosion & Diffusion Simulation</title>
+  <link rel="shortcut icon" href="">
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+    crossorigin="anonymous"></script>
+
+  <!-- Bootstrap -->
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+    crossorigin="anonymous">
+
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+    crossorigin="anonymous"></script>
+
+  <script>
+
+    function proxy_request(url, request_type, data, callback) {
+
+      var json_data =
+        {
+          url: url,
+          request_type: request_type,
+          data: data
+        };
+
+      var dataToSend = JSON.stringify(json_data);
+      var objresponse = null;
+
+      $.ajax({
+
+        url: '/proxy',
+        type: 'POST',
+        data: dataToSend,
+
+        success: function (jsonResponse) {
+          objresponse = JSON.parse(jsonResponse);
+          callback(objresponse);
+        },
+        error: function (jsonResponse) {
+          alert('Something went wrong.');
+        }
+      });
+
+      return objresponse;
+
+    };
+
+    function replace_text(data) {
+        //call back function example
+        html_to_replace = data['output'];
+        $('#panel1-body').html(html_to_replace);
+        $('#panel2-body').html(html_to_replace);
+
+      };
+
+    $(document).ready(function () {
+
+      // add functions that need to be executed when the web-page is loaded
+
+      $('#api-test-btn').click(function (event) {
+        data = { input: $('#panel-input').val() };
+        // data needs to be json
+        proxy_request("/api_test", "POST", data, replace_text);
+
+      });
+
+      $('#clear-panels-btn').click(function (event) {
+        html_to_replace = ``;
+        $('#panel1-body').html(html_to_replace);
+        $('#panel2-body').html(html_to_replace);
+        alert('Cleared!');
+
+      });
+
+      $('#send-to-panel1-btn').click(function (event) {
+        html_to_replace = $('#panel-input').val();
+        $('#panel1-body').html(html_to_replace);
+      });
+
+      $('#send-to-panel2-btn').click(function (event) {
+        html_to_replace = $('#panel-input').val()
+        $('#panel2-body').html(html_to_replace);
+      });
+
+
+    });
+
+  </script>
+</head>
+
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
+          aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">Corrosion & Diffusion Simulation</a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <!-- use following if nav bar needed -->
+          <!--li class="active"><a href="#">Home<span class="sr-only"></span></a></li!-->
+          <!--li><a href="#">To be implemented</li>
+            <li><a href="#">To be implemented</li>
+            <li><a href="#">To be implemented</li-->
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container-fluid -->
+  </nav>
+
+  <!-- grid layout -->
+  <div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Test Buttons</h3>
+        </div>
+        <!--div class="panel-body">
+          
+        </div-->
+        <ul class="list-group">
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-md-12">
+                <button id="api-test-btn" class="btn btn-default">API Test (Request to API server)</button>
+              </div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="panel-input" placeholder="Enter text to send to panel">
+              </div>
+              <div class="col-md-6">
+                <button id="send-to-panel1-btn" class="btn btn-default">Send Text to Panel 1</button>
+                <button id="send-to-panel2-btn" class="btn btn-default">Send Text to Panel 2</button>
+                <button id="clear-panels-btn" class="btn btn-default">Clear Panels</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-2"></div>
+  </div>
+  <div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-4">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Panel 1</h3>
+        </div>
+        <div class="panel-body" id="panel1-body">
+          Panel 1 contents displayed here
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Panel 2</h3>
+        </div>
+        <div class="panel-body" id="panel2-body">
+          Panel 2 contents displayed here
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2"></div>
+  </div>
+</body>
+
+</html>

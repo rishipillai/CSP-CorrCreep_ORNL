@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Corrosion & Diffusion Simulation</title>
+    <link rel="shortcut icon" href="">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap -->
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+
+    <script>
+
+        function proxy_request(url, request_type, data, callback) {
+
+            var json_data =
+            {
+                url: url,
+                request_type: request_type,
+                data: data
+            };
+
+            var dataToSend = JSON.stringify(json_data);
+            var objresponse = null;
+
+            $.ajax({
+
+                url: '/proxy',
+                type: 'POST',
+                data: dataToSend,
+
+                success: function (jsonResponse) {
+                    objresponse = JSON.parse(jsonResponse);
+                    callback(objresponse);
+                },
+                error: function (jsonResponse) {
+                    alert('Something went wrong.');
+                }
+            });
+
+            return objresponse;
+
+        };
+
+        function run_completed_corr(data) {
+            //call back function example
+            output = data['output'];
+            time_at_below = data['time_at_below'];
+            attack = data['attack'];
+            alert("Calculation completed! See the files at " + output + "* ");
+            if (environment=='sCO2') {
+                if (time_at_below != 999999) {
+                    alert("Criteria met! time to 5 wt.% concentration is at " + time_at_below);
+                } else {
+                    alert("Criteria did not meet!");
+                }
+            }
+            else {
+                alert("Depth of attack = "+ attack)
+            }
+        };
+
+        function run_completed_creep(data) {
+            //call back function example
+            output = data['output'];
+            time_at_below = data['time_at_below'];
+            timetocreep1 = data['timetocreep1'];
+            timetocreep2 = data['timetocreep2'];
+            
+            alert("Calculation completed! See the files at " + output + "* ");
+            alert("time to 1% creep strain = "+ timetocreep1)
+            alert("time 2o 1% creep strain = "+ timetocreep2)
+            
+        };
+
+        $(document).ready(function () {
+
+            // add functions that need to be executed when the web-page is loaded
+            $('#corr-sim-btn').click(function (event) {
+                thickness = $('#thickness').val();
+                temperature = $('#temperature').val();
+                stress = $('#stress').val();
+                endtime = $('#endtime').val();
+                material = $('#material').val();
+                environment = $('#environment').val();
+                output_file = $('#output-filename').val();
+                data = { output_file: output_file, thickness: thickness, temperature: temperature, stress: stress, endtime: endtime, material: material, environment: environment };
+                // data needs to be json
+                proxy_request("/corrosion-run/", "POST", data, run_completed_corr);
+
+            });
+
+            $('#creep-sim-btn').click(function (event) {
+                thickness = $('#thickness').val();
+                temperature = $('#temperature').val();
+                stress = $('#stress').val();
+                endtime = $('#endtime').val();
+                material = $('#material').val();
+                environment = $('#environment').val();
+                output_file = $('#output-filename').val();
+                data = { output_file: output_file, thickness: thickness, temperature: temperature, stress: stress, endtime: endtime, material: material, environment: environment };
+                // data needs to be json
+                proxy_request("/creep-run/", "POST", data, run_completed_creep);
+                alert('creep simulation');
+            });
+        });
+
+    </script>
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Corrosion & Creep Simulation</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <!-- use following if nav bar needed -->
+                    <!--li class="active"><a href="#">Home<span class="sr-only"></span></a></li!-->
+                    <!--li><a href="#">To be implemented</li>
+            <li><a href="#">To be implemented</li>
+            <li><a href="#">To be implemented</li-->
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <!-- grid layout -->
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Common Configuration for Simulation</h3>
+                </div>
+                <!--div class="panel-body">
+          
+        </div-->
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-md-4">
+                                Enter component thickness in cm:
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="thickness"
+                                    placeholder="Enter text to send to panel">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-md-4">
+                                Enter temperature in degree Celsius:
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="temperature"
+                                    placeholder="Enter text to send to panel">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-md-4">
+                                Select a material:
+                            </div>
+                            <div class="col-md-4">
+                                <select id="material">
+                                    <option value="740H" selected="selected">740H</option>
+                                    <option value="282">282</option>
+                                    <option value="625">625</option>
+                                </select>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-md-4">
+                                Enter output filename tag:
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="output-filename"
+                                    placeholder="Enter text to send to panel">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Corrosion Module</h3>
+                </div>
+                <!--div class="panel-body">
+          
+        </div-->
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-md-4">
+                                Enter end time for simulation:
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="endtime"
+                                    placeholder="Enter text to send to panel">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-md-4">
+                                Select an environment:
+                            </div>
+                            <div class="col-md-4">
+                                <select id="environment">
+                                    <option value="sCO2" selected="selected">sCO2</option>
+                                    <option value="KCl-MgCl2">KCl-MgCl2</option>
+                                </select>
+
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <button id="corr-sim-btn" class="btn btn-default">Run Corrosion Simulation</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Creep Module</h3>
+                </div>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-md-4">
+                                Enter stress in MPa:
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="stress"
+                                    placeholder="Enter text to send to panel">
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+
+                        <button id="creep-sim-btn" class="btn btn-default">Run Creep Simulation</button>
+
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+</body>
+
+</html>
