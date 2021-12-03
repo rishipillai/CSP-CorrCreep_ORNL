@@ -34,7 +34,7 @@ def dY_dt(t, Y):
     return array([(C3_e*eps0*exp(-C3_Q/(R*T))/(1-Y[2]))*sinh(Y[5]*(1-Y[1])/(sig0*(1-Y[3])*(1-Y[4]))), # dY[0]/dt corresponds to Y[0]=y0 here or =y1 in MatLab
                         (h/Y[5])*(1-Y[1]/H_star)*(C3_e*eps0*exp(-C3_Q/(R*T))/(1-Y[2]))*sinh(Y[5]*(1-Y[1])/(sig0*(1-Y[3])*(1-Y[4]))), #dY[1]/dt
                         C4*((1-Y[2])**2)*(C3_e*eps0*exp(-C3_Q/(R*T))/(1-Y[2]))*sinh(Y[5]*(1-Y[1])/(sig0*(1-Y[3])*(1-Y[4]))), #dY[2]/dt dislocation multiplication
-                        (exp(K_GP_0*con_p+sig_p*log(Y[5])))/(d**2*(Y[3]+1e-4)), #dY[3]/dt
+                        (K_GP)/(d**2*(Y[3]+1e-4)), #dY[3]/dt
                         (Kp/3)*(1-Y[4])**4, #dY[4]/dt
                         stress*(C3_e*eps0*exp(-C3_Q/(R*T))/(1-Y[2]))*sinh(Y[5]*(1-Y[1])/(sig0*(1-Y[3])*(1-Y[4])))]) #dY[5]/dt
 
@@ -109,46 +109,44 @@ if __name__=='__main__':
     Q_p                     = float(simu_values[6]) # Activation energy coarsening kJ/mol
     a_sp                    = float(simu_values[7]) # pre-exp depletion of GP microns2 h-1
     Q_sp                    = float(simu_values[8]) # Activation energy depletion of GP kJ/mol
-    sig_p                   = float(simu_values[9]) # Stress dependence parameter 1 for depletion of GP
-    con_p                   = float(simu_values[10]) # Stress dependence parameter 2 for depletion of GP
-    a_ys                    = float(simu_values[11]) #  constant for temperature dependence of yield strength
-    b_ys                    = float(simu_values[12]) #  constant for temperature dependence of yield strength
-    c_ys                    = float(simu_values[13]) #  constant for temperature dependence of yield strength
-    d_ys                    = float(simu_values[14]) #  constant for temperature dependence of yield strength
-    e_ys                    = float(simu_values[15]) #  constant for temperature dependence of yield strength
-    a_E                     = float(simu_values[16])  # constant for temperature dependence of Young's modulus
-    b_E                    = float(simu_values[17])  # constant for temperature dependence of Young's modulus
-    c_E                    = float(simu_values[18])  # constant for temperature dependence of Young's modulus
-    d_E                    = float(simu_values[19])  # constant for temperature dependence of Young's modulus
-    e_E                    = float(simu_values[20])  #  constant for temperature dependence of Young's modulus                     =
-    f_E                    = float(simu_values[21])  #  constant for temperature dependence of Young's modulus
-    a_s                    = float(simu_values[22])  #  constant for temperature dependence of strengthening phase vol. fraction
-    b_s                    = float(simu_values[23])  #  constant for temperature dependence of strengthening phase vol. fraction
-    c_s                    = float(simu_values[24])  #  constant for temperature dependence of strengthening phase vol. fraction
-    d_s                    = float(simu_values[25])  # constant for temperature dependence of strengthening phase vol. fraction
-    par1                   = float(simu_values[26])  # parameter1 related to alloy
-    par2                   = float(simu_values[27])  # parameter2 related to alloy
-    par3                   = float(simu_values[28])  # parameter3 related to alloy
-    par4                   = float(simu_values[29])  # parameter4 related to alloy
-    par5                   = float(simu_values[30])  # parameter4 related to alloy
+    a_ys                    = float(simu_values[9]) #  constant for temperature dependence of yield strength
+    b_ys                    = float(simu_values[10]) #  constant for temperature dependence of yield strength
+    c_ys                    = float(simu_values[11]) #  constant for temperature dependence of yield strength
+    d_ys                    = float(simu_values[12]) #  constant for temperature dependence of yield strength
+    e_ys                    = float(simu_values[13]) #  constant for temperature dependence of yield strength
+    a_E                     = float(simu_values[14])  # constant for temperature dependence of Young's modulus
+    b_E                    = float(simu_values[15])  # constant for temperature dependence of Young's modulus
+    c_E                    = float(simu_values[16])  # constant for temperature dependence of Young's modulus
+    d_E                    = float(simu_values[17])  # constant for temperature dependence of Young's modulus
+    e_E                    = float(simu_values[18])  #  constant for temperature dependence of Young's modulus                     =
+    f_E                    = float(simu_values[19])  #  constant for temperature dependence of Young's modulus
+    a_s                    = float(simu_values[20])  #  constant for temperature dependence of strengthening phase vol. fraction
+    b_s                    = float(simu_values[21])  #  constant for temperature dependence of strengthening phase vol. fraction
+    c_s                    = float(simu_values[22])  #  constant for temperature dependence of strengthening phase vol. fraction
+    d_s                    = float(simu_values[23])  # constant for temperature dependence of strengthening phase vol. fraction
+    par1                   = float(simu_values[24])  # parameter1 related to alloy
+    par2                   = float(simu_values[25])  # parameter2 related to alloy
+    par3                   = float(simu_values[26])  # parameter3 related to alloy
+    par4                   = float(simu_values[27])  # parameter4 related to alloy
+    par5                   = float(simu_values[28])  # parameter4 related to alloy
 
-    C1                     = float(simu_values[31]) # Back stress constant 1 MPa
-    C2                     = float(simu_values[32]) # Back stress constant 2 kJ/mol
+    C1                     = float(simu_values[29]) # Back stress constant 1 MPa
+    C2                     = float(simu_values[30]) # Back stress constant 2 kJ/mol
 
 
-    C3_Q                    = float(simu_values[33]) # Activation energy for intrinsic strain rate kJ/mol
-    C4                      = float(simu_values[34]) # Dislocation damage constant
+    C3_Q                    = float(simu_values[31]) # Activation energy for intrinsic strain rate kJ/mol
+    C4                      = float(simu_values[32]) # Dislocation damage constant
 
-    LMP_1                   = float(simu_values[35]) # Stress dependence of LMP - parameter 1
-    LMP_2                   = float(simu_values[36]) # Stress dependence of LMP - parameter 2
-    LMP_3                   = float(simu_values[37])  # Stress dependence of LMP - parameter 3
-    LMP_4                   = float(simu_values[38])  # Stress dependence of LMP - parameter 4
+    LMP_1                   = float(simu_values[33]) # Stress dependence of LMP - parameter 1
+    LMP_2                   = float(simu_values[34]) # Stress dependence of LMP - parameter 2
+    LMP_3                   = float(simu_values[35])  # Stress dependence of LMP - parameter 3
+    LMP_4                   = float(simu_values[36])  # Stress dependence of LMP - parameter 4
 
-    LMP_GP1                   = float(simu_values[39]) # GP dependence of LMP - parameter 1
-    LMP_GP2                   = float(simu_values[40]) # GP dependence of LMP - parameter 2
-    LMP_GP3                   = float(simu_values[41]) # GP dependence of LMP - parameter 3
-    LMP_GP4                   = float(simu_values[42]) # GP dependence of LMP - parameter 4
-    LMP_GP5                   = float(simu_values[43])  # GP dependence of LMP - pa
+    LMP_GP1                   = float(simu_values[37]) # GP dependence of LMP - parameter 1
+    LMP_GP2                   = float(simu_values[38]) # GP dependence of LMP - parameter 2
+    LMP_GP3                   = float(simu_values[39]) # GP dependence of LMP - parameter 3
+    LMP_GP4                   = float(simu_values[40]) # GP dependence of LMP - parameter 4
+    LMP_GP5                   = float(simu_values[41])  # GP dependence of LMP - pa
         
     """calculates values from input file"""
 
@@ -159,7 +157,7 @@ if __name__=='__main__':
 
     Kp=a_p*exp(-Q_p*1e3/(R*T)) #coarsening constant in h-1
 
-    K_GP_0 = a_sp * exp(-Q_sp*1e3 / R / T)  # depth of GP depletion in 740 in microns
+    K_GP = exp(a_sp) * exp(-Q_sp*1e3 / R / T)  # depth of GP depletion in 740 in microns
 
     sig0=C1*(1-exp(-C2/(R*Ts)*(Ts/T-1)))
     eps0=2*sqrt(vol_gp)*(1-vol_gp)*(sqrt(pi/4)-sqrt(vol_gp))
