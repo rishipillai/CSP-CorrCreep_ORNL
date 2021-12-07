@@ -1,5 +1,5 @@
 # Corrosion and Creep Simulation
-- Written by Rishi, Matt Lee (lees4@ornl.gov)
+- Written by Rishi Pillai (pillairr@ornl.gov), Marie Romedenne (romedennem@ornl.gov) and  Matt Lee (lees4@ornl.gov)
 
 
 # How to use in console mode if all required modules and python are pre-installed
