@@ -84,6 +84,16 @@ def run():
         write.writerows(creep_solution)
 
         print(timetocreep1(time,creepstrain),timetocreep2(time,creepstrain))
+        
+        lifetimevalues=[
+            ['Time to 1% creep (h)', 'Time to 2% creep (h)', 'Rupture time (h)', 'Rupture time based on gp (h)'],
+            [timetocreep1(time,creepstrain),timetocreep2(time,creepstrain),lmpstress(stress,temp),lmpgp(vol_gp,temp)]
+        ]
+
+    with open('lifetime_values.csv', 'w', encoding='UTF8',newline='') as f:
+        writer = csv.writer(f)
+    # write the data
+        writer.writerows(lifetimevalues)
 
 if __name__=='__main__':
     
