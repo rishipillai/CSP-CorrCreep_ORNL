@@ -152,7 +152,7 @@ def run():
 		
     """Integrating the ODE using scipy.integrate"""
 
-    t = linspace(0, 30000, 1000)  # time in h and number of points it is an array
+    t = linspace(0, final_time, 1000)  # time in h and number of points it is an array
     X0 = array([0.0000001, 0.0000001, 0.0000001, 0.0000001])  # initials conditions
     X, infodict = integrate.odeint(dX_dt, X0, t, full_output=True)
 
