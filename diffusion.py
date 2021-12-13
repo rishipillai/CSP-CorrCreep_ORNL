@@ -78,17 +78,20 @@ def advance_time(u,g,dt):
     u_list.append(u)
     return u
 
-def surfaceconcentration(u):
+def surfaceconcentration(u,x):
 
     """ Computes surface concentration in wt.% """
-    return u[2]
+    for w in range(0, len(x)):
+        if u[w] < 0:
+            surface=u[w+2]
+    return surface
 
 def depthofattack(u,x):
 
     """ Computes surface concentration in wt.% """
     for w in range(0, len(x)):
-        if u[w] < 0:
-            attack=x[w]
+        if u[w] < 0.01*cr_ini:
+            attack=1e4*x[w]
     return attack
 
 
@@ -125,8 +128,8 @@ def do_steps(i, nsteps=10):
         else:
             sys.exit()
 
-    print (" stepsdone=%5d, time_passed =%8gh, surfaceconcentration(u)=%8g, depthofattack(u,x)=%8g" %
-            (stepsdone,time_passed,surfaceconcentration(u),depthofattack(u,x)))
+    print (" stepsdone=%5d, time_passed =%8gh, surfaceconcentration(u,x)=%8g, depthofattack(u,x)=%8g" %
+            (stepsdone,time_passed,surfaceconcentration(u,x),depthofattack(u,x)))
     l.set_ydata(u) # update data in plot
     return l,
 
@@ -165,6 +168,12 @@ def run():
     W=column(X, 2)
     Ws=column(X, 3)
 
+    """plotting"""
+    Wm, Wr, W, Ws = X.T
+    Metal_loss=Wm/density*10000
+    print(Metal_loss)
+
+
     file = open(simu_output_file, 'w+', newline='')
 
     # writing the data into the file
@@ -173,10 +182,17 @@ def run():
         write.writerow(["Wm - mg.cm-2","Wr- mg.cm-2","W- mg.cm-2","Ws-mg.cm-2"])
         write.writerows(X)
 
-    """plotting"""
-    Wm, Wr, W, Ws = X.T
-    Metal_loss=Wm/density*10000
-    print(Metal_loss)
+        masschangevalues = [
+            ["Wm - mg.cm-2","Wr- mg.cm-2","W- mg.cm-2","Ws-mg.cm-2","Metal_Loss"],
+            [Wm, Wr, W, Ws, Metal_loss]
+        ]
+
+    with open('Masschange_values.csv', 'w', encoding='UTF8', newline='') as f:
+        writer = csv.writer(f)
+        # write the data
+        writer.writerows(masschangevalues)
+
+
     
     time_sec=t*3600
     Wm_data=np.array(Wm)
@@ -244,7 +260,7 @@ if __name__=='__main__':
     cr_ini                  = float(simu_values[11]) # initial Cr concentration in wt%
     D0                      = float(simu_values[12]) # Pre-exponential:Diffusion coefficient of Cr in m2/s
     Q_D                     = float(simu_values[13]) # Pre-exponential:Activation energy Diffusion coefficient of Cr in kJ/mol
-    dt                      = float(simu_values[14]) # seconds
+    #dt                      = float(simu_values[14]) # seconds
     density					= float(simu_values[15]) # alloy density in kg/m3
     const_Cract             = float(simu_values[16]) # constant for Cr-activity
     slope_Cract             = float(simu_values[17]) # slope for Cr-activity
@@ -256,7 +272,7 @@ if __name__=='__main__':
     print(Cr_act)
     B1=0
     D=D0*exp(-Q_D*1e3/(8.314*(Temp+273.15)))
-
+    dt = final_time*3600/500
     run()
     print("* Calculation completed.")
 
