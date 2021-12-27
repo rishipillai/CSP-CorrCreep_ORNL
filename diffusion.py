@@ -96,20 +96,19 @@ def depthofattack(u,x):
 
 
 
-def do_steps(i, nsteps=10):
+def do_steps(i, fig1, nsteps=10):
 
     global u
-
-    for i in range(nsteps):
-        time_passed = stepsdone * dt / 3600  # in hours
-
-        if time_passed <= final_time:
-
+    global time_at_below
+    global attack
+    time_passed = stepsdone * dt / 3600  # in hours
+    if time_passed <= final_time:
+        
+        for i in range(nsteps):
             g = compute_g(u,D,dt)
             u = advance_time(u,g,dt)
             time_passed_list.append(time_passed)
 
-        
             with open(simu_output_file+'-result-u-with-time-step.csv', 'w+') as f1, open(simu_output_file+'-x-inmicrons.csv', 'w', newline='') as f2, open(simu_output_file+'-time_passed_list_inhrs.csv', 'w', newline='') as f3:
                 my_writer1 = csv.writer(f1, delimiter=';')
                 my_writer2 = csv.writer(f2, delimiter=';')
@@ -123,13 +122,19 @@ def do_steps(i, nsteps=10):
 
                 my_writer3.writerow(["time_passed_inhrs"])
                 my_writer3.writerow(time_passed_list)
+            
+            if surfaceconcentration(u,x)<0.05:
+                print("corrosion lifetime criteria met at ", time_passed)
 
-
-        else:
-            sys.exit()
-
-    print (" stepsdone=%5d, time_passed =%8gh, surfaceconcentration(u,x)=%8g, depthofattack(u,x)=%8g" %
-            (stepsdone,time_passed,surfaceconcentration(u,x),depthofattack(u,x)))
+            if stepsdone%50==0:
+                print (" stepsdone=%5d, time_passed =%8gh, surfaceconcentration(u,x)=%8g, depthofattack(u,x)=%8g" %
+                        (stepsdone,time_passed,surfaceconcentration(u,x),depthofattack(u,x)))
+            
+            time_at_below = time_passed
+            attack = depthofattack(u,x)
+    else:
+        plt.close(fig1)
+    
     l.set_ydata(u) # update data in plot
     return l,
 
@@ -141,6 +146,16 @@ def dX_dt(X, t=0):
                     -b1 / a1 * B1]) #dWs/dt
 def run():
 
+    global A1, A2, Cr_act, b1, D, dt, B1
+    A1 = a1 ** 2 * (kp0*exp(-Q_kp*1e3/(8.314*(Temp+273.15)))) / 2
+    A2 = kp0_ms*exp(-Q_kp_ms*1e3/(8.314*(Temp+273.15)))
+    Cr_act=slope_Cract*(1/(Temp+273.15))+const_Cract
+    print(Cr_act)
+    B1=0
+    
+    D=D0*exp(-Q_D*1e3/(8.314*(Temp+273.15)))
+    dt = final_time*3600/500
+    
     # global variables used across multiple functions
     global simu_output_file
     global n1
@@ -152,7 +167,6 @@ def run():
     global x
     global l
     global Metal_loss
-		
     """Integrating the ODE using scipy.integrate"""
 
     t = linspace(0, final_time, 1000)  # time in h and number of points it is an array
@@ -171,9 +185,7 @@ def run():
     """plotting"""
     Wm, Wr, W, Ws = X.T
     Metal_loss=Wm/density*10000
-    print(Metal_loss)
-
-
+    
     file = open(simu_output_file, 'w+', newline='')
 
     # writing the data into the file
@@ -187,7 +199,7 @@ def run():
             [Wm, Wr, W, Ws, Metal_loss]
         ]
 
-    with open('Masschange_values.csv', 'w', encoding='UTF8', newline='') as f:
+    with open(simu_output_file+'-Masschange_values.csv', 'w', encoding='UTF8', newline='') as f:
         writer = csv.writer(f)
         # write the data
         writer.writerows(masschangevalues)
@@ -223,11 +235,22 @@ def run():
     ax = plt.axes(xlim=(a, b), ylim=(0, cr_ini/100+0.1))
     l ,= plt.plot (x ,u, 'b-o') # plot initial u (x , t )
 
+    global time_at_below
+    time_at_below = 999999
+    global attack
+    attack = -1
     # then compute solution and animate
+    for i in range(0,10000):
+        do_steps(i, fig1, nsteps=10)
 
-    line_ani = animation.FuncAnimation(fig1, do_steps, range(10000))
     plt.show()
-                   
+    print("Answer:", time_at_below)
+    print("Depth of Attack:", attack)
+    print("masschangevalues:", masschangevalues)
+    print("surfaceconcentration:", surfaceconcentration(u,x))
+
+    return time_at_below, attack
+
 if __name__=='__main__':
     
     stepsdone=0
@@ -260,19 +283,11 @@ if __name__=='__main__':
     cr_ini                  = float(simu_values[11]) # initial Cr concentration in wt%
     D0                      = float(simu_values[12]) # Pre-exponential:Diffusion coefficient of Cr in m2/s
     Q_D                     = float(simu_values[13]) # Pre-exponential:Activation energy Diffusion coefficient of Cr in kJ/mol
-    #dt                      = float(simu_values[14]) # seconds
     density					= float(simu_values[15]) # alloy density in kg/m3
     const_Cract             = float(simu_values[16]) # constant for Cr-activity
     slope_Cract             = float(simu_values[17]) # slope for Cr-activity
     
     """calculates parabolic constant in weight of metal / Cr mg2cm-4h-1"""
-    A1 = a1 ** 2 * (kp0*exp(-Q_kp*1e3/(8.314*(Temp+273.15)))) / 2
-    A2 = kp0_ms*exp(-Q_kp_ms*1e3/(8.314*(Temp+273.15)))
-    Cr_act=slope_Cract*(1/(Temp+273.15))+const_Cract
-    print(Cr_act)
-    B1=0
-    D=D0*exp(-Q_D*1e3/(8.314*(Temp+273.15)))
-    dt = final_time*3600/500
     run()
     print("* Calculation completed.")
 

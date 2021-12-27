@@ -72,6 +72,26 @@ def timetocreep2(time, creepstrain):
 
 
 def run():
+
+    global T, E, ys, vol_gp, Kp, K_GP, sig0, eps0, h, H_star, C3_e
+    T = temp + 273.15  # Temperature in Kelvin
+    E = 1e3 * (f_E * temp ** 5 + e_E * temp ** 4 + d_E * temp ** 3 + c_E * temp ** 2 + b_E * temp + a_E)  # Young Modulus in MPa
+    ys = e_ys * (temp) ** 4 + d_ys * temp ** 3 + c_ys * temp ** 2 + b_ys * temp + a_ys  # Yield strength MPa
+    vol_gp = d_s * temp ** 3 + c_s * temp ** 2 + b_s * temp + a_s  # vol. fraction of gamma prime
+
+    Kp = a_p * exp(-Q_p * 1e3 / (R * T))  # coarsening constant in h-1
+
+    K_GP = exp(a_sp) * exp(-Q_sp * 1e3 / R / T)  # depth of GP depletion in 740 in microns
+
+    sig0 = C1 * (1 - exp(-C2 / (R * Ts) * (Ts / T - 1)))
+    eps0 = 2 * sqrt(vol_gp) * (1 - vol_gp) * (sqrt(pi / 4) - sqrt(vol_gp))
+    h = E * vol_gp
+    H_star = 2 * vol_gp / (1 + vol_gp)
+
+    C3_e = exp(par1 + par2 * (1 / T) + par3 * sinh(stress / T) + par4 * log(1 / T) + par5 * log(stress / ys))
+
+
+
     """Integrating the ODE using scipy.integrate"""
     sol = solve_ivp(dY_dt, [0, 15863], [0.0, 0.0, 0.0, 0.0, 0.0, stress], method='Radau', rtol=1e-5, atol=1e-5,
                     first_step=1e-3, dense_output=bool)
@@ -82,7 +102,7 @@ def run():
     solution = np.vstack([time, creep])  # stacks time and creep
     creep_solution = np.transpose(solution)  # transpose array to save into CSV file
 
-    file = open(args.output_file + '-result_time_yi.csv', 'w+', newline='')
+    file = open(simu_output_file + '-result_time_yi.csv', 'w+', newline='')
 
     # writing the data into the file
     with file:
@@ -100,11 +120,15 @@ def run():
              lmpgp(vol_gp, temp)]
         ]
 
-    with open('lifetime_values.csv', 'w', encoding='UTF8', newline='') as f:
+    with open(simu_output_file+'-lifetime_values.csv', 'w', encoding='UTF8', newline='') as f:
         writer = csv.writer(f)
         # write the data
         writer.writerows(lifetimevalues)
 
+    print("lmpstress(stress,temp) : ", lmpstress(stress,temp))
+    print("lmpgp(vol_gp,temp) : ", lmpgp(vol_gp,temp))
+    
+    return timetocreep1(time, creepstrain), timetocreep2(time, creepstrain)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process simulation (creep)')
@@ -168,22 +192,6 @@ if __name__ == '__main__':
     LMP_GP5 = float(simu_values[41])  # GP dependence of LMP - pa
 
     """calculates values from input file"""
-
-    T = temp + 273.15  # Temperature in Kelvin
-    E = 1e3 * (f_E * temp ** 5 + e_E * temp ** 4 + d_E * temp ** 3 + c_E * temp ** 2 + b_E * temp + a_E)  # Young Modulus in MPa
-    ys = e_ys * (temp) ** 4 + d_ys * temp ** 3 + c_ys * temp ** 2 + b_ys * temp + a_ys  # Yield strength MPa
-    vol_gp = d_s * temp ** 3 + c_s * temp ** 2 + b_s * temp + a_s  # vol. fraction of gamma prime
-
-    Kp = a_p * exp(-Q_p * 1e3 / (R * T))  # coarsening constant in h-1
-
-    K_GP = exp(a_sp) * exp(-Q_sp * 1e3 / R / T)  # depth of GP depletion in 740 in microns
-
-    sig0 = C1 * (1 - exp(-C2 / (R * Ts) * (Ts / T - 1)))
-    eps0 = 2 * sqrt(vol_gp) * (1 - vol_gp) * (sqrt(pi / 4) - sqrt(vol_gp))
-    h = E * vol_gp
-    H_star = 2 * vol_gp / (1 + vol_gp)
-
-    C3_e = exp(par1 + par2 * (1 / T) + par3 * sinh(stress / T) + par4 * log(1 / T) + par5 * log(stress / ys))
 
     run()
     print("* Calculation completed.")

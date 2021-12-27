@@ -35,7 +35,7 @@
 
             var dataToSend = JSON.stringify(json_data);
             var objresponse = null;
-
+            
             $.ajax({
 
                 url: '/proxy',
@@ -45,6 +45,7 @@
                 success: function (jsonResponse) {
                     objresponse = JSON.parse(jsonResponse);
                     callback(objresponse);
+                    $("body").css("cursor", "default");
                 },
                 error: function (jsonResponse) {
                     alert('Something went wrong.');
@@ -99,6 +100,7 @@
                 output_file = $('#output-filename').val();
                 data = { output_file: output_file, thickness: thickness, temperature: temperature, stress: stress, endtime: endtime, material: material, environment: environment };
                 // data needs to be json
+                $("body").css("cursor", "progress");
                 proxy_request("/corrosion-run/", "POST", data, run_completed_corr);
 
             });
@@ -113,6 +115,7 @@
                 output_file = $('#output-filename').val();
                 data = { output_file: output_file, thickness: thickness, temperature: temperature, stress: stress, endtime: endtime, material: material, environment: environment };
                 // data needs to be json
+                $("body").css("cursor", "progress");
                 proxy_request("/creep-run/", "POST", data, run_completed_creep);
                 alert('creep simulation');
             });

@@ -21,12 +21,12 @@ docker build . -t corrsim
 
 Then, please run a command similar to:
 ```
-docker run -d -p8888:8888 -p8088:8088 -v [Absolute path to store your data]:/web_interface/output corrsim
+docker run -t -p8888:8888 -p8088:8088 -v [Absolute path to store your data]:/web_interface/output corrsim
 ```
 
 For instance, if you want to save output files in /Dcouments/Result then, run
 ```
-docker run -d -p8888:8888 -p8088:8088 -v /Documents/Result:/web_interface/output corrsim
+docker run -t -p8888:8888 -p8088:8088 -v /Documents/Result:/web_interface/output corrsim
 ```
 
 Open your web browser and go to http://localhost:8088 to start the GUI for the simulation
