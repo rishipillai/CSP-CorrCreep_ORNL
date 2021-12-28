@@ -115,7 +115,18 @@ def do_steps(i, fig1, nsteps=10):
                 my_writer3 = csv.writer(f3, delimiter=';')
 
                 my_writer1.writerow(["concentration profiles in weight fraction"])
+                '''
+                print("--------")
+                print(u_list[-1])
+                for i in range(0, len(u_list[-1])):
+                    print (i, u_list[-1][i])
+                    if u_list[-1][i]>0:
+                        break
+
+                print("--------")
+                '''
                 my_writer1.writerows(u_list)
+
 
                 my_writer2.writerow(["x in microns"])
                 my_writer2.writerow(x * 10000)
