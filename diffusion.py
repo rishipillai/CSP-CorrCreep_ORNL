@@ -114,17 +114,7 @@ def do_steps(i, fig1, nsteps=10):
                 my_writer2 = csv.writer(f2, delimiter=';')
                 my_writer3 = csv.writer(f3, delimiter=';')
 
-                my_writer1.writerow(["concentration profiles in weight fraction"])
-                '''
-                print("--------")
-                print(u_list[-1])
-                for i in range(0, len(u_list[-1])):
-                    print (i, u_list[-1][i])
-                    if u_list[-1][i]>0:
-                        break
-
-                print("--------")
-                '''
+                #my_writer1.writerow(["concentration profiles in weight fraction"])
                 my_writer1.writerows(u_list)
 
 
@@ -155,6 +145,24 @@ def dX_dt(X, t=0):
                     b1 / a1 * (b1 / a1 * A1 / X[1] - B1), #dWr/dt
                     1 / a1 * b1 / a1 * A1 / X[1] - b1 / a1 * B1, #dW/dt
                     -b1 / a1 * B1]) #dWs/dt
+import os
+
+def prepend_line(file_name, line):
+    """ Insert given string as a new line at the beginning of a file """
+    # define name of temporary dummy file
+    dummy_file = file_name + '.bak'
+    # open original file in read mode and dummy file in write mode
+    with open(file_name, 'r') as read_obj, open(dummy_file, 'w') as write_obj:
+        # Write given line to the dummy file
+        write_obj.write(line + '\n')
+        # Read lines from original file one by one and append them to the dummy file
+        for line in read_obj:
+            write_obj.write(line)
+    # remove original file
+    os.remove(file_name)
+    # Rename dummy file as the original file
+    os.rename(dummy_file, file_name)
+
 def run():
 
     global A1, A2, Cr_act, b1, D, dt, B1
@@ -255,11 +263,17 @@ def run():
         do_steps(i, fig1, nsteps=10)
 
     plt.show()
-    print("Answer:", time_at_below)
-    print("Depth of Attack:", attack)
-    print("masschangevalues:", masschangevalues)
-    print("surfaceconcentration:", surfaceconcentration(u,x))
 
+    df = pd.read_csv(simu_output_file+'-result-u-with-time-step.csv', delimiter=';')
+    last_row = df.iloc[-1].values.tolist()
+    j = 0
+    for i in range(0, len(last_row)):
+        if float(last_row[i])>0:
+            j = i
+            break
+    df = df.iloc[:,j:]
+    df.to_csv(simu_output_file+'-result-u-with-time-step.csv',index=False)
+    prepend_line(simu_output_file+'-result-u-with-time-step.csv','concentration profiles in weight fraction')
     return time_at_below, attack
 
 if __name__=='__main__':
