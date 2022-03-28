@@ -1,6 +1,11 @@
 # Corrosion and Creep Simulation
 - Written by Rishi Pillai (pillairr@ornl.gov), Marie Romedenne (romedennem@ornl.gov) and  Matt Lee (lees4@ornl.gov)
 
+# Citation
+
+Please cite the use of this tool as:
+
+Pillai Rishi, Romedenne Marie, and Lee Sangkeun. 2022. "Development of an Open-source Alloy selection and Lifetime assessment tool for structural components in CSP". United States. https://doi.org/10.2172/1843687. https://www.osti.gov/servlets/purl/1843687.
 
 # How to use in console mode if all required modules and python are pre-installed
 
