@@ -35,7 +35,7 @@ def column(matrix, i):
 def compute_g(u,D,dt):
     global stepsdone
 
-    corr_var=2
+    corr_var=1
 
     """ given a u (x , t ) in array , compute g (x,t)= D * d ^2 u / dx ^2
     using central differences with spacing h ,
@@ -263,7 +263,7 @@ def run():
         do_steps(i, fig1, nsteps=10)
 
     plt.show()
-
+    
     df = pd.read_csv(simu_output_file+'-result-u-with-time-step.csv', delimiter=';')
     last_row = df.iloc[-1].values.tolist()
     j = 0
@@ -271,8 +271,9 @@ def run():
         if float(last_row[i])>0:
             j = i
             break
-    df = df.iloc[:,j:]
+    df = df.iloc[:,j+1:]
     df.to_csv(simu_output_file+'-result-u-with-time-step.csv',index=False)
+    
     prepend_line(simu_output_file+'-result-u-with-time-step.csv','concentration profiles in weight fraction')
     return time_at_below, attack
 
