@@ -32,10 +32,8 @@ import argparse
 def column(matrix, i):
     return [row[i] for row in matrix]
 
-def compute_g(u,D,dt):
+def compute_g(u,D,dt, corr_var):
     global stepsdone
-
-    corr_var=1
 
     """ given a u (x , t ) in array , compute g (x,t)= D * d ^2 u / dx ^2
     using central differences with spacing h ,
@@ -79,8 +77,8 @@ def advance_time(u,g,dt):
     return u
 
 def surfaceconcentration(u,x):
-
     """ Computes surface concentration in wt.% """
+    surface=u[0] # is this ok?
     for w in range(0, len(x)):
         if u[w] < 0:
             surface=u[w+2]
@@ -96,7 +94,7 @@ def depthofattack(u,x):
 
 
 
-def do_steps(i, fig1, nsteps=10):
+def do_steps(i, fig1, corr_var, nsteps=10):
 
     global u
     global time_at_below
@@ -105,7 +103,7 @@ def do_steps(i, fig1, nsteps=10):
     if time_passed <= final_time:
         
         for i in range(nsteps):
-            g = compute_g(u,D,dt)
+            g = compute_g(u,D,dt, corr_var)
             u = advance_time(u,g,dt)
             time_passed_list.append(time_passed)
 
@@ -163,7 +161,7 @@ def prepend_line(file_name, line):
     # Rename dummy file as the original file
     os.rename(dummy_file, file_name)
 
-def run():
+def run(corr_var):
 
     global A1, A2, Cr_act, b1, D, dt, B1
     A1 = a1 ** 2 * (kp0*exp(-Q_kp*1e3/(8.314*(Temp+273.15)))) / 2
@@ -260,7 +258,7 @@ def run():
     attack = -1
     # then compute solution and animate
     for i in range(0,10000):
-        do_steps(i, fig1, nsteps=10)
+        do_steps(i, fig1, corr_var, nsteps=10)
 
     plt.show()
     
@@ -285,6 +283,7 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser(description='Process simulation (diffusion)')
     parser.add_argument('input_file', help='simulation input file name')
     parser.add_argument('output_file', help='simulation output file name')
+    parser.add_argument('--corr_var', help='set corr_var 1 or 2', default=2)
 
     args = parser.parse_args()    
 
@@ -294,7 +293,7 @@ if __name__=='__main__':
     simu_input = open(simu_input_file, 'r')
     simu_values = simu_input.readlines()
     simu_input.close()
-    
+    corr_var = int(args.corr_var)
     final_time              = int(simu_values[0])    # hours
     Temp                    = int(simu_values[1])    # Temperature in C entered globally by user
     kp0                     = float(simu_values[2])  # Pre-exponential:Parabolic rate constant for Cr2O3 in mg2cm-4h-1
@@ -312,9 +311,9 @@ if __name__=='__main__':
     density					= float(simu_values[15]) # alloy density in kg/m3
     const_Cract             = float(simu_values[16]) # constant for Cr-activity
     slope_Cract             = float(simu_values[17]) # slope for Cr-activity
-    
+    print("corr_var is set to =", corr_var)
     """calculates parabolic constant in weight of metal / Cr mg2cm-4h-1"""
-    run()
+    run(corr_var)
     print("* Calculation completed.")
 
  
